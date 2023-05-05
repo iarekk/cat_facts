@@ -8,19 +8,19 @@ defmodule CatFacts.ApiClient do
 
   def get_verified_fact(attempts_remaining \\ @max_attempts)
 
-  def get_verified_fact(0), do: {:error, "Max attempts reached"}
+  def get_verified_fact(attempts_remaining) when attempts_remaining > 0 do
+    case batch_get_verified_facts(@batch_size) do
+      [fact | _] ->
+        {:ok, fact}
 
-  def get_verified_fact(attempts_remaining) do
-    facts = try_get_verified_facts(@batch_size)
-
-    if(Enum.empty?(facts)) do
-      get_verified_fact(attempts_remaining - 1)
-    else
-      {:ok, List.first(facts)}
+      _ ->
+        get_verified_fact(attempts_remaining - 1)
     end
   end
 
-  def try_get_verified_facts(batch_size) do
+  def get_verified_fact(_), do: {:error, "Max attempts reached"}
+
+  def batch_get_verified_facts(batch_size) do
     with {:ok, facts} <- get_random_facts(batch_size) do
       Logger.info("trying to get facts with batch size #{batch_size}")
       facts |> filter_verified() |> transform_facts()
