@@ -16,7 +16,7 @@ defmodule CatFacts.ApiClient do
     if(Enum.empty?(facts)) do
       get_verified_fact(attempts_remaining - 1)
     else
-      List.first(facts)
+      {:ok, List.first(facts)}
     end
   end
 
