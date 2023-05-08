@@ -8,7 +8,7 @@ defmodule CatFacts.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      CatFacts.DiscordConsumer
+      CatFacts.DiscordSupervisor
       # Starts a worker by calling: CatFacts.Worker.start_link(arg)
       # {CatFacts.Worker, arg}
     ]
