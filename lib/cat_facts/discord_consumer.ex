@@ -8,8 +8,8 @@ defmodule CatFacts.DiscordConsumer do
     Logger.debug("handle event #{inspect(msg)}")
 
     case msg.content do
-      "ping!" ->
-        Api.create_message(msg.channel_id, "pong!")
+      "!fact" ->
+        publish_fact(msg.channel_id)
 
       _ ->
         :ignore
@@ -21,5 +21,12 @@ defmodule CatFacts.DiscordConsumer do
   def handle_event(event) do
     Logger.debug("handle default event #{inspect(event)}")
     :noop
+  end
+
+  def publish_fact(channel_id) do
+    Task.async(fn ->
+      {:ok, %CatFacts.Fact{text: text}} = CatFacts.ApiClient.get_verified_fact()
+      Api.create_message(channel_id, "#{text}")
+    end)
   end
 end
