@@ -2,6 +2,12 @@
 
 **TODO: Add description**
 
+## Discord bot
+
+The bot will respond to any message with text `!fact`, and will post a random cat fact:
+
+![Cat facts bot in action](cat_facts_in_action.png)
+
 ## Current state
 
 The API can be called like that:
