@@ -1,6 +1,12 @@
 # CatFacts
 
-**TODO: Add description**
+Simple Elixir client for the cat facts API <https://github.com/alexwohlbruck/cat-facts>.
+
+Written to quickly/imperfectly illustrate:
+
+* how to call an API in Elixir, with retries
+* parse the JSON into a structure
+* build a Discord bot using Nostrum <https://github.com/Kraigie/nostrum>
 
 ## Discord bot
 
