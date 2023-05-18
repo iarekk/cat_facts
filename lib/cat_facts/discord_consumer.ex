@@ -24,7 +24,7 @@ defmodule CatFacts.DiscordConsumer do
   end
 
   def publish_fact(channel_id) do
-    Task.async(fn ->
+    Task.start(fn ->
       {:ok, %CatFacts.Fact{text: text}} = CatFacts.ApiClient.get_verified_fact()
       Api.create_message(channel_id, "#{text}")
     end)
