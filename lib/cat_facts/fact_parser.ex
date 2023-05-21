@@ -11,6 +11,7 @@ defmodule CatFacts.FactParser do
 
   def parse_facts(body_string) do
     with {:ok, raw_fact_list} <- decode_facts(body_string) do
+      # TODO do we need validation for e.g. JSON not containing a list? How can it be done?
       Enum.map(raw_fact_list, &Fact.new(&1))
     else
       error -> error
