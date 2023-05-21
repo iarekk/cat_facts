@@ -29,13 +29,20 @@ defmodule ApiClientTest do
     {code, [fact]} = ApiClient.parse_response({:ok, %{status_code: 200, body: json}})
 
     assert :ok == code
-    assert fact.created_at == ~U[2018-04-20T20:27:41.961Z]
+    assert ~U[2018-04-20T20:27:41.961Z] == fact.created_at
   end
 
   test "invalid json handled" do
     {code, err} = ApiClient.parse_response({:ok, %{status_code: 200, body: "asdf"}})
 
-    assert :ok == code
-    assert err == {:error, %Poison.ParseError{data: "asdf", skip: 0, value: nil}}
+    assert :error == code
+    assert %Poison.ParseError{data: "asdf", skip: 0, value: nil} == err
+  end
+
+  test "bad status code" do
+    {code, err} = ApiClient.parse_response({:ok, %{status_code: 419, body: nil}})
+
+    assert :error == code
+    assert "Bad status code 419" == err
   end
 end

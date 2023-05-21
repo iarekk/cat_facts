@@ -53,13 +53,15 @@ defmodule CatFacts.ApiClient do
     Logger.debug("Received response with status code=#{status_code}")
     Logger.debug(fn -> inspect(body) end)
 
-    # TODO IK I don't liek that we parse response even if status code is bad, replace with `with`?
-    {
-      status_code |> check_for_error,
-      body |> FactParser.parse_facts()
-    }
+    with :ok <- check_for_error(status_code),
+         [facts] <- FactParser.parse_facts(body) do
+      {:ok, [facts]}
+    else
+      :bad_status_code -> {:error, "Bad status code #{inspect(status_code)}"}
+      error -> error
+    end
   end
 
   defp check_for_error(200), do: :ok
-  defp check_for_error(_), do: :error
+  defp check_for_error(_), do: :bad_status_code
 end
