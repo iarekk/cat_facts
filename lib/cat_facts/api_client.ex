@@ -1,6 +1,6 @@
 defmodule CatFacts.ApiClient do
   require Logger
-  alias CatFacts.Fact
+  alias CatFacts.{Fact, FactParser}
   @user_agent [{"User-agent", "Elixir iarek"}]
   @api_url Application.compile_env(:cat_facts, :api_url)
   @batch_size Application.compile_env(:cat_facts, :batch_size)
@@ -9,7 +9,10 @@ defmodule CatFacts.ApiClient do
   def get_verified_fact(attempts_remaining \\ @max_attempts)
 
   def get_verified_fact(attempts_remaining) when attempts_remaining > 0 do
-    case batch_get_verified_facts(@batch_size) do
+    batch = batch_get_verified_facts(@batch_size)
+    Logger.debug("received verified facts #{inspect(batch)}")
+
+    case batch do
       [fact | _] ->
         {:ok, fact}
 
@@ -21,20 +24,11 @@ defmodule CatFacts.ApiClient do
   def get_verified_fact(_), do: {:error, "Max attempts reached"}
 
   def batch_get_verified_facts(batch_size) do
-    with {:ok, facts} <- get_random_facts(batch_size) do
-      Logger.info("trying to get facts with batch size #{batch_size}")
-      facts |> filter_verified() |> transform_facts()
+    with {:ok, raw_facts} <- get_random_facts(batch_size) do
+      raw_facts |> Enum.filter(&Fact.is_verified?(&1))
     else
       error -> error
     end
-  end
-
-  def filter_verified(facts) do
-    facts |> Enum.filter(fn fact -> fact["status"]["verified"] == true end)
-  end
-
-  def transform_facts(facts) do
-    facts |> Enum.map(&Fact.new(&1))
   end
 
   @doc """
@@ -52,16 +46,17 @@ defmodule CatFacts.ApiClient do
   def get_random_facts(amount) when is_integer(amount) and amount > 0 do
     random_fact_url(amount)
     |> HTTPoison.get(@user_agent)
-    |> handle_response
+    |> parse_response
   end
 
-  def handle_response({:ok, %{status_code: status_code, body: body}}) do
-    Logger.info("Received response with status code=#{status_code}")
+  def parse_response({:ok, %{status_code: status_code, body: body}}) do
+    Logger.debug("Received response with status code=#{status_code}")
     Logger.debug(fn -> inspect(body) end)
 
+    # TODO IK I don't liek that we parse response even if status code is bad, replace with `with`?
     {
       status_code |> check_for_error,
-      body |> Poison.Parser.parse!()
+      body |> FactParser.parse_facts()
     }
   end
 
