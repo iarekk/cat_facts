@@ -9,10 +9,13 @@ defmodule CatFacts.FactParser do
     {:error, {"Bad input", arg}}
   end
 
+  def check_if_list(raw_facts) when is_list(raw_facts), do: {:ok, raw_facts}
+  def check_if_list(_), do: {:error, "Input json didn't parse into a list"}
+
   def parse_facts(body_string) do
-    with {:ok, raw_fact_list} <- decode_facts(body_string) do
-      # TODO do we need validation for e.g. JSON not containing a list? How can it be done?
-      Enum.map(raw_fact_list, &Fact.new(&1))
+    with {:ok, raw_facts} <- decode_facts(body_string),
+         {:ok, raw_fact_list} <- check_if_list(raw_facts) do
+      {:ok, raw_fact_list |> Enum.filter(&Fact.can_parse(&1)) |> Enum.map(&Fact.new(&1))}
     else
       error -> error
     end
