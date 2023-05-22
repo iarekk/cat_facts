@@ -51,11 +51,11 @@ defmodule CatFacts.ApiClient do
 
   def parse_response({:ok, %{status_code: status_code, body: body}}) do
     Logger.debug("Received response with status code=#{status_code}")
-    Logger.debug(fn -> inspect(body) end)
+    Logger.debug(fn -> "body: #{inspect(body)}" end)
 
     with :ok <- check_for_error(status_code),
-         [facts] <- FactParser.parse_facts(body) do
-      {:ok, [facts]}
+         {:ok, facts} <- FactParser.parse_facts(body) do
+      {:ok, facts}
     else
       :bad_status_code -> {:error, "Bad status code #{inspect(status_code)}"}
       error -> error

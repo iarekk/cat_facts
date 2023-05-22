@@ -39,6 +39,20 @@ defmodule ApiClientTest do
     assert %Poison.ParseError{data: "asdf", skip: 0, value: nil} == err
   end
 
+  test "more invalid inputs" do
+    {code, err} = ApiClient.parse_response({:ok, %{status_code: 200, body: "{\"a\":\"1\"}"}})
+
+    assert :error == code
+    assert "Input json didn't parse into a list" == err
+  end
+
+  test "list of non-fact objects" do
+    {code, facts} = ApiClient.parse_response({:ok, %{status_code: 200, body: "[{\"a\":\"1\"}]"}})
+
+    assert :ok == code
+    assert [] == facts
+  end
+
   test "bad status code" do
     {code, err} = ApiClient.parse_response({:ok, %{status_code: 419, body: nil}})
 
