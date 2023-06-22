@@ -2,7 +2,7 @@ defmodule CatFacts.FactParser do
   alias CatFacts.Fact
 
   def decode_facts(json_str) when is_binary(json_str) do
-    Poison.decode(json_str)
+    Jason.decode(json_str)
   end
 
   def decode_facts(arg) do
