@@ -36,7 +36,7 @@ defmodule ApiClientTest do
     {code, err} = ApiClient.parse_response({:ok, %{status_code: 200, body: "asdf"}})
 
     assert :error == code
-    assert %Poison.ParseError{data: "asdf", skip: 0, value: nil} == err
+    assert %Jason.DecodeError{data: "asdf", __exception__: true, position: 0, token: nil} == err
   end
 
   test "more invalid inputs" do
